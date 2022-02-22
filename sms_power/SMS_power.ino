@@ -26,6 +26,7 @@ const char gprsPass[] = "";
 #include <Ticker.h>
 #include "at_parsing.h"
 #include "dht_reader.h"
+#include "secrets.h"
 
 TinyGsm modem(SerialAT);
 
@@ -247,7 +248,10 @@ void loop()
     res ="";
     // Init Parser
     ATParser parser(modem);
-
+    Serial.println();
+    Serial.println("Test secrets:");
+    Serial.println(wifi_name);
+    Serial.println("Test DHT:");
     Serial.println(dht_message());
     
     while (1) {
