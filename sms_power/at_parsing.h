@@ -27,9 +27,9 @@ class ATParser {
     void parse_at(String data);
   private:
     TinyGsm* local_modem;
-    message_indata messages_storage_array[100];
-    String part_storage_array[100];
-    String row_storage_array[100];
+    message_indata messages_storage_array[10];
+    String part_storage_array[50];
+    String row_storage_array[50];
     void parse_message(Vector<String> data, int *index);
     void split_string(String str, Vector<String> *strs, String sep, String qualifier = "\"");
     

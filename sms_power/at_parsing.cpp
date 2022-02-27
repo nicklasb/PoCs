@@ -60,30 +60,38 @@ void ATParser::split_string(String str, Vector<String> *strs, String sep, String
 void ATParser::parse_message(Vector<String> data, int *index) {
   
   Vector<String> parts(this->part_storage_array);
+  int cmt_offset = 0;
+  String command = "+CMG";
 
 
   //Serial.println("Message found!"); 
 
   // Handle CMT - Add comma
-  data[*index].replace("+CMT: ", "+CMT: ,");
+  if (data[*index].substring(0,4) == "+CMT") {
+    data[*index].replace("+CMT: ", "+CMT: ,");
+    cmt_offset = -1;
+    command = "+CMT"; 
+  } 
+  
+  
   
   split_string(data[*index], &parts, ","); 
 
   message_indata* indata = new message_indata();
   
-  if (parts.size() != 4) {
+  if (parts.size() != 5 + cmt_offset) {
     Serial.print("Bad first row in data: Wrong number of parts: ");
     Serial.println(parts.size());
   }
 
   // Handle multipart
-  indata->phone_number = parts[1];
-  indata->message_datetime = parts[3];
+  indata->phone_number = parts[2 + cmt_offset];
+  indata->message_datetime = parts[4 + cmt_offset];
 
   ++*index;
 
 
-  while (*index < data.size() ) {
+  while (*index < data.size() && data[*index].substring(0,4) != command && data[*index].substring(0,2) != "OK") {
     if (indata->message  != "") {
       indata->message+= "\r\n";
     }
@@ -105,9 +113,11 @@ void ATParser::parse_message(Vector<String> data, int *index) {
   Serial.print("this->messages.max_size():");
   Serial.println(this->messages.max_size()); 
   */
+
+  // Decrease as the calling for loop will increase otherwise
+  --*index;
   
-  ++*index;
-  
+
 }
 
 
@@ -122,12 +132,12 @@ void ATParser::parse_at(String data) {
     // Show the resulting substrings
   for (int i = 0; i < rows.size(); i++)
   {
-    /*
+    
     Serial.print("Row ");
     Serial.print(i);
     Serial.print(":");
     Serial.println(rows[i]);
-    */
+    
     
     // Add class for SMS message
     if (rows[i].substring(0, 5) == "+CMGL" || rows[i].substring(0, 4) == "+CMT"){
